@@ -1,13 +1,59 @@
+<?php
+// Mulai sesi
+session_start();
+
+// Panggil file koneksi database
+include 'db_connection.php';
+
+// Cek apakah form telah disubmit
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Query untuk mengecek username
+    $sql = "SELECT * FROM user WHERE username = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows == 1) {
+        $user = $result->fetch_assoc();
+
+        // Verifikasi password (dengan hash)
+        if (password_verify($password, $user['password'])) {
+            // Login berhasil
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['role'] = $user['role'];
+
+            // Redirect berdasarkan role
+            if ($user['role'] === 'admin') {
+                header("Location: dashboard_admin.php");
+            } else {
+                header("Location: dashboard_user.php"); // Halaman untuk pengguna non-admin
+            }
+            exit();
+        } else {
+            $error = "Password salah.";
+        }
+    } else {
+        $error = "Username tidak ditemukan.";
+    }
+}
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register Form</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Login Admin</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
+        /* Salin CSS dari desain Anda sebelumnya */
         * {
             margin: 0;
             padding: 0;
@@ -39,7 +85,8 @@
             margin-bottom: 20px;
         }
 
-        .input-box {
+        .wrapper .input-box {
+            width: 100%;
             margin: 20px 0;
             position: relative;
         }
@@ -64,6 +111,7 @@
             right: 20px;
             transform: translateY(-50%);
             color: #fff;
+            cursor: pointer;
         }
 
         .btn {
@@ -110,27 +158,42 @@
             transform: scaleX(1);
             transform-origin: bottom left;
         }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="wrapper">
-        <form action="process_register.php" method="POST">
-            <h1>Register</h1>
+        <form action="" method="POST">
+            <h1>Login Admin</h1>
             <div class="input-box">
                 <input type="text" name="username" placeholder="Username" required>
                 <i class='bx bx-user'></i>
             </div>
             <div class="input-box">
-                <input type="email" name="email" placeholder="Email" required>
-                <i class='bx bx-envelope'></i>
+                <input type="password" name="password" id="password" placeholder="Password" required oninput="togglePasswordIcon()">
+                <i id="password-icon" class='bx bx-lock'></i>
             </div>
-            <div class="input-box">
-                <input type="password" name="password" placeholder="Password" required>
-                <i class='bx bx-lock'></i>
-            </div>
-            <button type="submit" class="btn">Register</button>
-            <p>Already have an account? <a href="login.php">Login</a></p>
+            <button type="submit" class="btn">Login</button>
+            <p>Belum punya akun? <a href="register_admin.php">Register</a></p>
+            <?php if (isset($error)) { echo "<p class='error'>$error</p>"; } ?>
         </form>
     </div>
+
+    <script>
+        function togglePasswordIcon() {
+            var passwordInput = document.getElementById("password");
+            var passwordIcon = document.getElementById("password-icon");
+
+            if (passwordInput.value.length > 0) {
+                passwordIcon.style.display = "none";
+            } else {
+                passwordIcon.style.display = "block";
+            }
+        }
+    </script>
 </body>
 </html>
