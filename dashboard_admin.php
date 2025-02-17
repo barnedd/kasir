@@ -180,6 +180,7 @@ $role = ucfirst($_SESSION['role']); // Ubah huruf pertama role menjadi kapital
         <h2>Dashboard Kasir</h2>
         <ul>
             <li><a href="#"><i class="bx bx-home"></i> Dashboard</a></li>
+            <li><a href="transaksi.php"><i class="bx bx-cart"></i> Transaksi</a></li>
             <li><a href="logout.php"><i class="bx bx-log-out"></i> Logout</a></li>
         </ul>
     </div>
@@ -202,11 +203,10 @@ $role = ucfirst($_SESSION['role']); // Ubah huruf pertama role menjadi kapital
             if ($result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
                     echo "<div class='menu-card'>";
-                    echo "<img src='https://via.placeholder.com/300x150' alt='{$row['NamaProduk']}'>";
                     echo "<div class='content'>";
                     echo "<h3>{$row['NamaProduk']}</h3>";
                     echo "<p>Stok: {$row['stok']}</p>";
-                    echo "<p class='price'>Rp {$row['harga']}</p>";
+                    echo "<p class='price'>Rp.{$row['harga']}</p>";
                     echo "<div class='btn-group'>";
                     echo "<a href='edit_menu.php?id={$row['ProdukID']}' class='btn'>Edit</a>";
                     echo "<button class='btn' onclick='deleteMenu({$row['ProdukID']})'>Hapus</button>";
